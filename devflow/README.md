@@ -6,7 +6,7 @@ Built as a portfolio flagship project to demonstrate taking a product from requi
 
 ## Status
 
-**Phase 2 — Project Foundation.** Repo scaffolded: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui foundation, Supabase client/server helpers, folder structure, permission model, and an initial DB migration. No features are wired up to real data yet — that starts in Phase 3.
+**Phase 5 — Task Management (implemented; migration 0003 must be applied to the configured Supabase database).** Projects now have a responsive Kanban board with task CRUD, project-member assignment, priorities, due dates, labels, search, and filters. Task and label permissions are enforced by both the API and RLS.
 
 See `docs/` for the full design.
 
@@ -27,11 +27,13 @@ cp .env.example .env.local   # fill in your Supabase project URL + anon key
 npm run dev
 ```
 
-Apply the initial schema to your Supabase project:
+Apply the migrations to your Supabase project. For a new database, link the Supabase CLI to the project and run:
 
 ```bash
-supabase db push   # or paste supabase/migrations/0001_init.sql into the SQL editor
+supabase db push
 ```
+
+If `0001_init.sql` and `0002_projects_and_members.sql` were already applied manually, apply `0003_task_management.sql` once in the Supabase SQL Editor, or reconcile the migration history before using `supabase db push`.
 
 ## Scripts
 
@@ -48,7 +50,8 @@ supabase db push   # or paste supabase/migrations/0001_init.sql into the SQL edi
 ## Documentation
 
 - [`docs/architecture.md`](./docs/architecture.md) — request flow, folder structure, authorization strategy, API conventions
-- [`docs/database.md`](./docs/database.md) — ERD, table design, RLS policies
+- [`docs/database.md`](./docs/database.md) — ERD, table design, and RLS policies
+- [`docs/api.md`](./docs/api.md) — project, member, task, and label endpoint reference
 
 ## Project roadmap
 
@@ -56,8 +59,8 @@ supabase db push   # or paste supabase/migrations/0001_init.sql into the SQL edi
 1. System Design — **done**
 2. Project Foundation — **in progress**
 3. Authentication & Authorization
-4. Projects & Members
-5. Task Management
+4. Projects & Members — **done**
+5. Task Management — **implemented; database migration pending**
 6. Collaboration (comments, issues, activity)
 7. Sprint Management
 8. Analytics

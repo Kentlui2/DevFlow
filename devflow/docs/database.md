@@ -143,6 +143,23 @@ The PRD is explicit: _"Never rely on the frontend alone to enforce permissions."
 - `tasks`, `issues`, `comments`: `SELECT` allowed to project members; `INSERT`/`UPDATE` restricted to `role IN ('owner', 'developer')`.
 - `activities`: `INSERT` only via a `SECURITY DEFINER` function (never direct client insert, so the log can't be forged); `SELECT` allowed to project members.
 
+### Phase 4 policy implementation
+
+Migration `0002_projects_and_members.sql` adds security-definer membership helpers so project and task RLS checks do not recursively query the `project_members` policy. It also:
+
+- Restricts project reads to members and project updates/deletes to owners.
+- Allows member roster reads within a shared project; owners can add registered users as developers/viewers, change those roles, and remove non-owners.
+- Prevents a project member row from being reassigned to another project or user, and keeps the owner role immutable.
+- Creates a project and its initial owner membership atomically through `create_project`.
+- Adds a scoped `users` read policy so members can see teammate profile details but not unrelated users.
+- Allows project members to read the activity feed.
+
+The add-member flow accepts an email for an existing DevFlow account. Sending invitations to people who have not registered requires a separate email invitation service and is not included in this phase.
+
+### Phase 5 policy implementation
+
+Migration `0003_task_management.sql` enables RLS on `labels` and `task_labels`. Project members can read labels; owners and developers can create labels and attach/detach labels from tasks. A database trigger prevents assigning a task to someone outside its project and keeps a task's project and creator immutable. Label names are unique within a project, ignoring case.
+
 ## Indexes worth adding early
 
 - `project_members(project_id, user_id)` — unique, and the hot path for every authorization check.

@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "DevFlow",
   description:
     "Project management and collaboration platform for software development teams.",
+  icons: {
+    icon: "/brand/devflow-mascot.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -2,40 +2,31 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getProjectRole } from "@/lib/auth/project-access";
 import { permissions } from "@/lib/auth/permissions";
 import { apiError, readJson } from "@/lib/http/api-response";
-import { createTask, listProjectTasks } from "@/lib/services/taskService";
-import { createTaskSchema, taskFiltersSchema } from "@/lib/validation/task";
+import {
+  createProjectLabel,
+  listProjectLabels,
+} from "@/lib/services/taskService";
+import { createLabelSchema } from "@/lib/validation/task";
 import { createClient } from "@/lib/supabase/server";
 
 type RouteContext = { params: Promise<{ projectId: string }> };
 
-export async function GET(request: NextRequest, { params }: RouteContext) {
+export async function GET(_request: NextRequest, { params }: RouteContext) {
+  void _request;
   const { projectId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return apiError("Not authenticated", "UNAUTHENTICATED", 401);
-
   const role = await getProjectRole(supabase, projectId, user.id);
   if (!role) return apiError("Project not found", "NOT_FOUND", 404);
-
-  const query = Object.fromEntries(request.nextUrl.searchParams.entries());
-  const parsedFilters = taskFiltersSchema.safeParse(query);
-  if (!parsedFilters.success) {
-    return apiError(
-      "Invalid task filters",
-      "VALIDATION_ERROR",
-      400,
-      parsedFilters.error.flatten()
-    );
-  }
-
   try {
     return NextResponse.json({
-      data: await listProjectTasks(supabase, projectId, parsedFilters.data),
+      data: await listProjectLabels(supabase, projectId),
     });
   } catch {
-    return apiError("Could not load project tasks", "INTERNAL_ERROR", 500);
+    return apiError("Could not load project labels", "INTERNAL_ERROR", 500);
   }
 }
 
@@ -46,41 +37,36 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return apiError("Not authenticated", "UNAUTHENTICATED", 401);
-
   const role = await getProjectRole(supabase, projectId, user.id);
   if (!role) return apiError("Project not found", "NOT_FOUND", 404);
-  if (!permissions.createTask(role))
+  if (!permissions.editTask(role))
     return apiError("Not authorized", "FORBIDDEN", 403);
 
-  const parsed = createTaskSchema.safeParse(await readJson(request));
+  const parsed = createLabelSchema.safeParse(await readJson(request));
   if (!parsed.success) {
     return apiError(
-      "Invalid task details",
+      "Invalid label",
       "VALIDATION_ERROR",
       400,
       parsed.error.flatten()
     );
   }
-
   try {
-    const task = await createTask(supabase, projectId, user.id, parsed.data);
-    return NextResponse.json({ data: task }, { status: 201 });
+    const label = await createProjectLabel(supabase, projectId, parsed.data);
+    return NextResponse.json({ data: label }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-    if (message.includes("TASK_ASSIGNEE_MUST_BE_PROJECT_MEMBER")) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "23505"
+    ) {
       return apiError(
-        "Choose a member of this project",
-        "INVALID_ASSIGNEE",
-        400
+        "A label with that name already exists in this project",
+        "LABEL_ALREADY_EXISTS",
+        409
       );
     }
-    if (message.includes("TASK_LABELS_MUST_BELONG_TO_PROJECT")) {
-      return apiError(
-        "One or more labels do not belong to this project",
-        "INVALID_LABELS",
-        400
-      );
-    }
-    return apiError("Could not create the task", "INTERNAL_ERROR", 500);
+    return apiError("Could not create the label", "INTERNAL_ERROR", 500);
   }
 }
