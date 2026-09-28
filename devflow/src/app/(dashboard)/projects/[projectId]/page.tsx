@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Activity,
+  BarChart3,
+  GitBranch,
   Bug,
   ArrowLeft,
   CheckCircle2,
@@ -62,6 +64,20 @@ const projectSections: {
     icon: Activity,
     href: "activity",
     action: "View",
+  },
+  {
+    label: "Analytics",
+    detail: "Understand project progress and team workload",
+    icon: BarChart3,
+    href: "analytics",
+    action: "Explore",
+  },
+  {
+    label: "GitHub",
+    detail: "Connect a repository and link code to tasks",
+    icon: GitBranch,
+    href: "github",
+    action: "Connect",
   },
 ];
 

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
 import { CommentThread } from "@/components/shared/comment-thread";
+import { AttachmentsPanel } from "@/components/shared/attachments-panel";
 import {
   ISSUE_PRIORITIES,
   ISSUE_STATUSES,
@@ -36,6 +37,10 @@ export function IssueList({
   loadError: boolean;
 }) {
   const [issues, setIssues] = useState(initialIssues);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setIssues(initialIssues));
+    return () => cancelAnimationFrame(frame);
+  }, [initialIssues]);
   const [editor, setEditor] = useState<ProjectIssue | null | undefined>(
     undefined
   );
@@ -579,6 +584,8 @@ function IssueEditorDialog({
           ) : null}
         </form>
         {issue ? (
+          <>
+          <AttachmentsPanel canEdit={canEdit} projectId={projectId} targetId={issue.id} targetType="issue" />
           <CommentThread
             canComment={canEdit}
             commentableId={issue.id}
@@ -587,6 +594,7 @@ function IssueEditorDialog({
             initialComments={[]}
             projectId={projectId}
           />
+          </>
         ) : null}
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           <div>

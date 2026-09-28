@@ -4,6 +4,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
+import { AttachmentsPanel } from "@/components/shared/attachments-panel";
+import { createClient } from "@/lib/supabase/client";
 import type { ProjectComment } from "@/lib/types/collaboration";
 
 export function CommentThread({
@@ -55,6 +57,21 @@ export function CommentThread({
       active = false;
     };
   }, [projectId, commentableType, commentableId]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase.channel(`comments:${commentableId}`)
+      .on("postgres_changes", {
+        event: "*", schema: "public", table: "comments",
+        filter: `commentable_id=eq.${commentableId}`,
+      }, () => {
+        void fetch(`/api/projects/${projectId}/comments?commentableType=${commentableType}&commentableId=${commentableId}`)
+          .then((response) => response.json()).then((result) => {
+            if (Array.isArray(result.data)) setComments(result.data as ProjectComment[]);
+          });
+      }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [projectId, commentableId, commentableType]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -211,6 +228,7 @@ export function CommentThread({
                     />
                   </div>
                 ) : null}
+                <AttachmentsPanel canEdit={canComment} projectId={projectId} targetId={comment.id} targetType="comment" />
               </li>
             );
           })}

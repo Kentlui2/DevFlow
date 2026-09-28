@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { BrandMascot } from "@/components/shared/brand-mascot";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -43,6 +44,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <span className="text-muted-foreground hidden text-sm lg:inline">Team workspace</span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell userId={user.id} />
             <span className="text-muted-foreground hidden max-w-48 truncate text-sm sm:inline">{user.email}</span>
             <span aria-label={`Signed in as ${user.email}`} className="bg-primary/10 text-primary grid size-8 place-items-center rounded-full text-sm font-semibold">{initials}</span>
             <form action={signOut}>

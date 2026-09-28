@@ -83,6 +83,25 @@ The project backlog is `/projects/:projectId/backlog`; it lists tasks without a 
 
 Only one sprint can be active per project. Sprint status moves from `planned` to `active` to `completed`; dates are locked once a sprint starts. Project members can view sprint plans, while only owners can change sprint configuration or task assignments.
 
+## Analytics
+
+Project analytics are rendered server-side at `/projects/:projectId/analytics` for all project members. Metrics are calculated from the caller's RLS-scoped task, issue, sprint, sprint-task, member, and activity records; there is no separate analytics write API. Sprint velocity counts completed tasks (not story points), and workload includes active, in-progress, and completed task counts for each current member.
+
+## Phase 9 integrations
+
+| Method | Route | Access | Purpose |
+| --- | --- | --- | --- |
+| `GET` / `POST` | `/api/projects/:projectId/github` | Member / owner | List connected repositories and recent GitHub activity; connect or disconnect a repository. |
+| `GET` / `POST` / `DELETE` | `/api/projects/:projectId/tasks/:taskId/github-links` | Member / editor | Read, attach, or remove a commit, pull request, or issue reference on a task. |
+| `GET` / `POST` | `/api/projects/:projectId/attachments` | Member / editor | List signed download links for an item or upload a file (10 MB maximum). `targetType` is `task`, `issue`, or `comment`. |
+| `DELETE` | `/api/projects/:projectId/attachments/:attachmentId` | Uploader/editor | Remove an attachment and its private object. |
+| `GET` / `PATCH` | `/api/notifications` | Signed-in user | Read the latest 50 notifications; mark unread notifications read (`PATCH` body: `{ "ids": [] }` for all unread or a list of IDs). |
+| `GET` | `/api/projects/:projectId/github/connect` | Project owner | Start the GitHub App install and user authorization flow. |
+| `GET` | `/api/integrations/github/setup` | GitHub redirect | Bind the returned installation ID to the initiating project and continue OAuth authorization. |
+| `GET` | `/api/integrations/github/callback` | GitHub redirect | Verify the user can access the installation, then sync the repositories granted to the App. |
+
+GitHub activity uses GitHub's REST API. Public repositories can be linked by URL. Private repositories require a project owner to install the public DevFlow GitHub App for an account or organization and select repository access. DevFlow verifies the installation against the signed-in GitHub user, stores installation/repository identifiers, and mints short-lived tokens scoped to one repository per activity request. Live changes use Supabase Realtime subscriptions on the `activities`, `comments`, and `notifications` tables and remain subject to RLS. Apply `0007_github_app_installations.sql` and configure the server-only GitHub App credentials described in the README before enabling this flow.
+
 Request bodies are validated with Zod. Route handlers authenticate and authorize the request before calling the service layer. Supabase RLS repeats project and role checks independently. Task assignees and task labels must belong to the same project. Owners cannot be removed or demoted through the member endpoints.
 Issue assignees and labels must belong to the same project. Viewers can read issues, comments, and activity but cannot write; comments can only be edited or deleted by their author.
 

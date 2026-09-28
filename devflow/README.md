@@ -6,7 +6,7 @@ Built as a portfolio flagship project to demonstrate taking a product from requi
 
 ## Status
 
-**Phase 7 — Sprint Management (implemented; migration 0005 must be applied to the configured Supabase database).** Projects include an unscheduled-work backlog, sprint planning, owner-managed sprint lifecycles, task assignment to sprints, and completion progress. Phase 6 provides task and issue comments, issue tracking, and an automatically recorded activity feed. Permissions are enforced by the API and Supabase RLS.
+**Phase 9 — Advanced Integrations (implemented).** Projects can connect GitHub repositories, view recent commits/pull requests/issues, and link code references to tasks. Live project activity and comments refresh in real time; assignment, mention, comment, sprint, and pull request events create an in-app notification; tasks, issues, and comments support private file attachments. Permissions are enforced by project membership and Supabase RLS.
 
 See `docs/` for the full design.
 
@@ -33,7 +33,11 @@ Apply the migrations to your Supabase project. For a new database, link the Supa
 supabase db push
 ```
 
-If `0001_init.sql` through `0003_task_management.sql` were already applied manually, apply `0004_collaboration.sql` once in the Supabase SQL Editor, or reconcile the migration history before using `supabase db push`.
+If you have been applying migrations in the Supabase SQL Editor, apply `0006_advanced_integrations.sql` after the earlier migrations. It creates the private attachment bucket and access policies as well as notification, GitHub, and attachment tables. The migration adds the required tables to `supabase_realtime` when that publication is available.
+
+GitHub public repositories can be linked by URL. Private repository access uses a GitHub App installation: each project owner installs the app for their GitHub account or organization and chooses the repositories to grant. DevFlow stores the installation and repository IDs, then creates short-lived installation tokens restricted to the requested repository. It does not store users' personal access tokens.
+
+To enable the GitHub App flow, apply `supabase/migrations/0007_github_app_installations.sql`, then register a **public** GitHub App. Grant read-only **Contents**, **Issues**, and **Pull requests** permissions. Set the Setup URL to `https://YOUR_DEVFLOW_HOST/api/integrations/github/setup` and the Callback URL to `https://YOUR_DEVFLOW_HOST/api/integrations/github/callback`. Leave **Request user authorization (OAuth) during installation** off; DevFlow starts that authorization after the setup redirect so it can securely verify the installation. Enable **Redirect on update** so changes to repository selection sync back to DevFlow. Add `GITHUB_APP_ID`, `GITHUB_APP_SLUG`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`, and `GITHUB_APP_PRIVATE_KEY` to the server environment. Keep every value server-side; never use a `NEXT_PUBLIC_` prefix. The callback URL must exactly match the deployment URL registered in GitHub.
 
 ## Scripts
 
@@ -51,7 +55,7 @@ If `0001_init.sql` through `0003_task_management.sql` were already applied manua
 
 - [`docs/architecture.md`](./docs/architecture.md) — request flow, folder structure, authorization strategy, API conventions
 - [`docs/database.md`](./docs/database.md) — ERD, table design, and RLS policies
-- [`docs/api.md`](./docs/api.md) — project, member, task, issue, comment, and activity endpoint reference
+- [`docs/api.md`](./docs/api.md) — project, member, task, issue, comment, activity, attachment, notification, and GitHub endpoint reference
 
 ## Project roadmap
 
@@ -62,7 +66,7 @@ If `0001_init.sql` through `0003_task_management.sql` were already applied manua
 4. Projects & Members — **done**
 5. Task Management — **implemented**
 6. Collaboration (comments, issues, activity) — **implemented**
-7. Sprint Management — **implemented; migration 0005 pending**
-8. Analytics
-9. Advanced Integrations (GitHub, real-time, notifications, attachments)
+7. Sprint Management — **implemented**
+8. Analytics — **implemented**
+9. Advanced Integrations (GitHub, real-time, notifications, attachments) — **implemented**
 10. Production (testing, CI/CD, deployment, docs)

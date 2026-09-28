@@ -175,6 +175,12 @@ Migration `0004_collaboration.sql` adds issues and issue-label links, completes 
 
 Migration `0005_sprint_management.sql` creates sprints and task assignments. Project members can read sprint plans; only project owners can create, update, delete, or assign sprint tasks. Database constraints enforce valid date ranges, a single active sprint per project, one sprint per task, and same-project task assignment. Trigger-based activity records capture sprint lifecycle and task planning changes.
 
+### Phase 9 policy implementation
+
+Migration `0006_advanced_integrations.sql` adds member-scoped in-app notifications, project GitHub repository connections and task references, and attachment metadata for tasks, issues, and comments. Notification content is trigger-created and immutable; users can only mark their own rows as read. GitHub references are validated against repositories and tasks in the same project. Attachments use a private `devflow-attachments` Storage bucket, a 10 MB per-file limit, signed downloads, project membership checks, and same-project target validation. Activity, comment, and notification tables are added to the `supabase_realtime` publication when available.
+
+Migration `0007_github_app_installations.sql` records each project's GitHub App installation and the GitHub repository IDs granted to it. Installation rows are readable by project members and manageable only by project owners. Repository activity requests use installation tokens restricted to the selected repository; no per-user GitHub token is persisted.
+
 ## Indexes worth adding early
 
 - `project_members(project_id, user_id)` — unique, and the hot path for every authorization check.

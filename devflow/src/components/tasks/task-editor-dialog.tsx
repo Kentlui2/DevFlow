@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
 import { CommentThread } from "@/components/shared/comment-thread";
+import { AttachmentsPanel } from "@/components/shared/attachments-panel";
+import { TaskGithubLinks } from "@/components/tasks/task-github-links";
 import {
   TASK_PRIORITIES,
   TASK_STATUSES,
@@ -344,6 +346,9 @@ export function TaskEditorDialog({
         </form>
 
         {task ? (
+          <>
+          <AttachmentsPanel canEdit={canEdit} projectId={projectId} targetId={task.id} targetType="task" />
+          <TaskGithubLinks canEdit={canEdit} projectId={projectId} taskId={task.id} />
           <CommentThread
             canComment={canEdit}
             commentableId={task.id}
@@ -352,6 +357,7 @@ export function TaskEditorDialog({
             initialComments={[]}
             projectId={projectId}
           />
+          </>
         ) : null}
 
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t pt-4">

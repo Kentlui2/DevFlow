@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,13 @@ export function TaskBoard({
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [labelFilter, setLabelFilter] = useState("");
   const [sprintFilter, setSprintFilter] = useState("");
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setTasks(initialTasks);
+      setLabels(initialLabels);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [initialTasks, initialLabels]);
   const [error, setError] = useState<string | null>(
     loadError
       ? "Some board information could not be loaded. Refresh the page to try again."
