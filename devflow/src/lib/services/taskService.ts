@@ -55,9 +55,28 @@ export async function listProjectTasks(
     query = query.in("id", taskIds);
   }
 
+  if (filters.sprintId && filters.sprintId !== "unassigned") {
+    const { data: links, error: linkError } = await supabase
+      .from("sprint_tasks")
+      .select("task_id")
+      .eq("sprint_id", filters.sprintId);
+    if (linkError) throw linkError;
+    const taskIds = [...new Set((links ?? []).map((row) => row.task_id))];
+    if (!taskIds.length) return [];
+    query = query.in("id", taskIds);
+  }
+
   const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   let rows = (data ?? []) as TaskRow[];
+  if (filters.sprintId === "unassigned") {
+    const { data: links, error: linkError } = await supabase
+      .from("sprint_tasks")
+      .select("task_id");
+    if (linkError) throw linkError;
+    const assignedTaskIds = new Set((links ?? []).map((row) => row.task_id));
+    rows = rows.filter((task) => !assignedTaskIds.has(task.id));
+  }
   if (filters.search) {
     const search = filters.search.toLocaleLowerCase();
     rows = rows.filter((task) =>

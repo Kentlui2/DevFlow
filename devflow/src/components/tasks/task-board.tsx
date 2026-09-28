@@ -5,6 +5,7 @@ import { Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Sprint } from "@/lib/types";
 import { TaskEditorDialog } from "@/components/tasks/task-editor-dialog";
 import {
   TASK_PRIORITIES,
@@ -22,17 +23,21 @@ type EditorState = {
 export function TaskBoard({
   projectId,
   projectName,
+  currentUserId,
   initialTasks,
   initialLabels,
   members,
+  sprints,
   canEdit,
   loadError,
 }: {
   projectId: string;
   projectName: string;
+  currentUserId: string;
   initialTasks: TaskBoardItem[];
   initialLabels: ProjectTaskLabel[];
   members: TaskPerson[];
+  sprints: Pick<Sprint, "id" | "name" | "status">[];
   canEdit: boolean;
   loadError: boolean;
 }) {
@@ -43,6 +48,7 @@ export function TaskBoard({
   const [priorityFilter, setPriorityFilter] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [labelFilter, setLabelFilter] = useState("");
+  const [sprintFilter, setSprintFilter] = useState("");
   const [error, setError] = useState<string | null>(
     loadError
       ? "Some board information could not be loaded. Refresh the page to try again."
@@ -69,17 +75,32 @@ export function TaskBoard({
             : task.assigneeId === assigneeFilter);
         const labelMatch =
           !labelFilter || task.labels.some((label) => label.id === labelFilter);
-        return searchMatch && priorityMatch && assigneeMatch && labelMatch;
+        const sprintMatch =
+          !sprintFilter ||
+          (sprintFilter === "unassigned"
+            ? !task.sprintId
+            : task.sprintId === sprintFilter);
+        return (
+          searchMatch &&
+          priorityMatch &&
+          assigneeMatch &&
+          labelMatch &&
+          sprintMatch
+        );
       }),
-    [tasks, search, priorityFilter, assigneeFilter, labelFilter]
+    [tasks, search, priorityFilter, assigneeFilter, labelFilter, sprintFilter]
   );
 
   function saveTask(saved: TaskBoardItem) {
     setTasks((current) => {
       const exists = current.some((task) => task.id === saved.id);
       return exists
-        ? current.map((task) => (task.id === saved.id ? saved : task))
-        : [saved, ...current];
+        ? current.map((task) =>
+            task.id === saved.id
+              ? { ...saved, sprintId: task.sprintId ?? null }
+              : task
+          )
+        : [{ ...saved, sprintId: null }, ...current];
     });
     setError(null);
     setNotice("Task saved.");
@@ -121,7 +142,12 @@ export function TaskBoard({
       }
       setTasks((current) =>
         current.map((task) =>
-          task.id === taskId ? (result.data as TaskBoardItem) : task
+          task.id === taskId
+            ? {
+                ...(result.data as TaskBoardItem),
+                sprintId: task.sprintId ?? null,
+              }
+            : task
         )
       );
       setNotice(
@@ -197,7 +223,7 @@ export function TaskBoard({
 
       <section
         aria-label="Filter tasks"
-        className="bg-card grid gap-3 rounded-lg border p-3 sm:grid-cols-2 lg:grid-cols-[minmax(12rem,1.6fr)_repeat(3,minmax(10rem,1fr))]"
+        className="bg-card grid gap-3 rounded-lg border p-3 sm:grid-cols-2 lg:grid-cols-[minmax(12rem,1.6fr)_repeat(4,minmax(10rem,1fr))]"
       >
         <label className="relative block">
           <span className="sr-only">Search tasks</span>
@@ -262,6 +288,23 @@ export function TaskBoard({
             {labels.map((label) => (
               <option key={label.id} value={label.id}>
                 {label.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">Filter by sprint</span>
+          <select
+            aria-label="Filter by sprint"
+            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+            onChange={(event) => setSprintFilter(event.target.value)}
+            value={sprintFilter}
+          >
+            <option value="">All sprint assignments</option>
+            <option value="unassigned">Backlog · no sprint</option>
+            {sprints.map((sprint) => (
+              <option key={sprint.id} value={sprint.id}>
+                {sprint.name} · {sprint.status}
               </option>
             ))}
           </select>
@@ -439,6 +482,7 @@ export function TaskBoard({
         <TaskEditorDialog
           canEdit={canEdit}
           initialStatus={editor.status}
+          currentUserId={currentUserId}
           key={editor.task?.id ?? `new-${editor.status}`}
           labels={labels}
           members={members}

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
+import { CommentThread } from "@/components/shared/comment-thread";
 import {
   TASK_PRIORITIES,
   TASK_STATUSES,
@@ -18,6 +19,7 @@ export function TaskEditorDialog({
   projectId,
   task,
   initialStatus,
+  currentUserId,
   canEdit,
   members,
   labels,
@@ -29,6 +31,7 @@ export function TaskEditorDialog({
   projectId: string;
   task: TaskBoardItem | null;
   initialStatus: TaskBoardItem["status"];
+  currentUserId: string;
   canEdit: boolean;
   members: TaskPerson[];
   labels: ProjectTaskLabel[];
@@ -146,7 +149,7 @@ export function TaskEditorDialog({
       }}
       ref={dialogRef}
     >
-      <form className="p-5 sm:p-7" onSubmit={submit}>
+      <div className="p-5 sm:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
@@ -167,179 +170,190 @@ export function TaskEditorDialog({
           </Button>
         </div>
 
-        <fieldset
-          className="mt-6 space-y-5"
-          disabled={!canEdit || isSubmitting}
-        >
-          <div className="space-y-2">
-            <Label htmlFor="task-title">Title</Label>
-            <Input
-              autoFocus
-              id="task-title"
-              maxLength={200}
-              name="title"
-              defaultValue={task?.title ?? ""}
-              placeholder="What needs to be done?"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="task-description">Description</Label>
-            <Textarea
-              id="task-description"
-              maxLength={5000}
-              name="description"
-              defaultValue={task?.description ?? ""}
-              placeholder="Add useful details for your team…"
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form id="task-editor-form" className="mt-6" onSubmit={submit}>
+          <fieldset className="space-y-5" disabled={!canEdit || isSubmitting}>
             <div className="space-y-2">
-              <Label htmlFor="task-status">Status</Label>
-              <select
-                className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
-                defaultValue={task?.status ?? initialStatus}
-                id="task-status"
-                name="status"
-              >
-                {TASK_STATUSES.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="task-priority">Priority</Label>
-              <select
-                className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
-                defaultValue={task?.priority ?? "medium"}
-                id="task-priority"
-                name="priority"
-              >
-                {TASK_PRIORITIES.map((priority) => (
-                  <option key={priority.value} value={priority.value}>
-                    {priority.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="task-assignee">Assignee</Label>
-              <select
-                className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
-                defaultValue={task?.assigneeId ?? ""}
-                id="task-assignee"
-                name="assigneeId"
-              >
-                <option value="">Unassigned</option>
-                {members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.fullName || member.email}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="task-due-date">Due date</Label>
+              <Label htmlFor="task-title">Title</Label>
               <Input
-                id="task-due-date"
-                name="dueDate"
-                type="date"
-                defaultValue={task?.dueDate ?? ""}
+                autoFocus
+                id="task-title"
+                maxLength={200}
+                name="title"
+                defaultValue={task?.title ?? ""}
+                placeholder="What needs to be done?"
+                required
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <Label>Labels</Label>
-              {canEdit ? (
-                <Button
-                  onClick={() => setShowNewLabel((visible) => !visible)}
-                  size="sm"
-                  type="button"
-                  variant="outline"
+            <div className="space-y-2">
+              <Label htmlFor="task-description">Description</Label>
+              <Textarea
+                id="task-description"
+                maxLength={5000}
+                name="description"
+                defaultValue={task?.description ?? ""}
+                placeholder="Add useful details for your team…"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="task-status">Status</Label>
+                <select
+                  className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
+                  defaultValue={task?.status ?? initialStatus}
+                  id="task-status"
+                  name="status"
                 >
-                  {showNewLabel ? "Cancel" : "New label"}
-                </Button>
+                  {TASK_STATUSES.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-priority">Priority</Label>
+                <select
+                  className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
+                  defaultValue={task?.priority ?? "medium"}
+                  id="task-priority"
+                  name="priority"
+                >
+                  {TASK_PRIORITIES.map((priority) => (
+                    <option key={priority.value} value={priority.value}>
+                      {priority.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-assignee">Assignee</Label>
+                <select
+                  className="border-input bg-background focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-2"
+                  defaultValue={task?.assigneeId ?? ""}
+                  id="task-assignee"
+                  name="assigneeId"
+                >
+                  <option value="">Unassigned</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.fullName || member.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-due-date">Due date</Label>
+                <Input
+                  id="task-due-date"
+                  name="dueDate"
+                  type="date"
+                  defaultValue={task?.dueDate ?? ""}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Labels</Label>
+                {canEdit ? (
+                  <Button
+                    onClick={() => setShowNewLabel((visible) => !visible)}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {showNewLabel ? "Cancel" : "New label"}
+                  </Button>
+                ) : null}
+              </div>
+              {labels.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {labels.map((label) => {
+                    const selected = selectedLabels.includes(label.id);
+                    return (
+                      <label
+                        className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${selected ? "border-foreground/25 bg-accent" : "hover:bg-muted"}`}
+                        key={label.id}
+                      >
+                        <input
+                          checked={selected}
+                          className="accent-primary"
+                          disabled={!canEdit || isSubmitting}
+                          onChange={(event) =>
+                            setSelectedLabels((current) =>
+                              event.target.checked
+                                ? [...current, label.id]
+                                : current.filter((id) => id !== label.id)
+                            )
+                          }
+                          type="checkbox"
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="size-2 rounded-full"
+                          style={{ backgroundColor: label.color }}
+                        />
+                        {label.name}
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No labels yet.</p>
+              )}
+              {showNewLabel ? (
+                <div className="bg-muted/40 grid gap-2 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_3rem_auto] sm:items-end">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-label-name">Label name</Label>
+                    <Input
+                      autoFocus
+                      id="new-label-name"
+                      maxLength={32}
+                      onChange={(event) => setNewLabelName(event.target.value)}
+                      value={newLabelName}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-label-color">Color</Label>
+                    <Input
+                      aria-label="Label color"
+                      className="h-9 w-12 cursor-pointer p-1"
+                      id="new-label-color"
+                      onChange={(event) => setNewLabelColor(event.target.value)}
+                      type="color"
+                      value={newLabelColor}
+                    />
+                  </div>
+                  <Button
+                    disabled={isCreatingLabel || !newLabelName.trim()}
+                    onClick={createLabel}
+                    type="button"
+                  >
+                    {isCreatingLabel ? "Adding…" : "Add label"}
+                  </Button>
+                </div>
               ) : null}
             </div>
-            {labels.length ? (
-              <div className="flex flex-wrap gap-2">
-                {labels.map((label) => {
-                  const selected = selectedLabels.includes(label.id);
-                  return (
-                    <label
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${selected ? "border-foreground/25 bg-accent" : "hover:bg-muted"}`}
-                      key={label.id}
-                    >
-                      <input
-                        checked={selected}
-                        className="accent-primary"
-                        disabled={!canEdit || isSubmitting}
-                        onChange={(event) =>
-                          setSelectedLabels((current) =>
-                            event.target.checked
-                              ? [...current, label.id]
-                              : current.filter((id) => id !== label.id)
-                          )
-                        }
-                        type="checkbox"
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor: label.color }}
-                      />
-                      {label.name}
-                    </label>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">No labels yet.</p>
-            )}
-            {showNewLabel ? (
-              <div className="bg-muted/40 grid gap-2 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_3rem_auto] sm:items-end">
-                <div className="space-y-1.5">
-                  <Label htmlFor="new-label-name">Label name</Label>
-                  <Input
-                    autoFocus
-                    id="new-label-name"
-                    maxLength={32}
-                    onChange={(event) => setNewLabelName(event.target.value)}
-                    value={newLabelName}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="new-label-color">Color</Label>
-                  <Input
-                    aria-label="Label color"
-                    className="h-9 w-12 cursor-pointer p-1"
-                    id="new-label-color"
-                    onChange={(event) => setNewLabelColor(event.target.value)}
-                    type="color"
-                    value={newLabelColor}
-                  />
-                </div>
-                <Button
-                  disabled={isCreatingLabel || !newLabelName.trim()}
-                  onClick={createLabel}
-                  type="button"
-                >
-                  {isCreatingLabel ? "Adding…" : "Add label"}
-                </Button>
-              </div>
-            ) : null}
-          </div>
-        </fieldset>
+          </fieldset>
 
-        {error ? (
-          <p className="text-destructive mt-4 text-sm" role="alert">
-            {error}
-          </p>
+          {error ? (
+            <p className="text-destructive mt-4 text-sm" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </form>
+
+        {task ? (
+          <CommentThread
+            canComment={canEdit}
+            commentableId={task.id}
+            commentableType="task"
+            currentUserId={currentUserId}
+            initialComments={[]}
+            projectId={projectId}
+          />
         ) : null}
+
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           <div>
             {!creating && canEdit ? (
@@ -363,7 +377,11 @@ export function TaskEditorDialog({
               {canEdit ? "Cancel" : "Close"}
             </Button>
             {canEdit ? (
-              <Button disabled={isSubmitting} type="submit">
+              <Button
+                disabled={isSubmitting}
+                form="task-editor-form"
+                type="submit"
+              >
                 {isSubmitting
                   ? "Saving…"
                   : creating
@@ -373,7 +391,7 @@ export function TaskEditorDialog({
             ) : null}
           </div>
         </div>
-      </form>
+      </div>
     </dialog>
   );
 }

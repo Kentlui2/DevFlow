@@ -35,6 +35,7 @@ export const taskFiltersSchema = z.object({
   priority: taskPriorityEnum.optional(),
   assigneeId: z.union([z.string().uuid(), z.literal("unassigned")]).optional(),
   labelId: z.string().uuid().optional(),
+  sprintId: z.union([z.string().uuid(), z.literal("unassigned")]).optional(),
   search: z.string().trim().max(120).optional(),
 });
 

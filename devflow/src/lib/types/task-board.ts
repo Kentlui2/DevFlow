@@ -24,6 +24,7 @@ export type TaskBoardItem = {
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;
+  sprintId?: string | null;
   assignee: TaskPerson | null;
   labels: TaskLabel[];
 };

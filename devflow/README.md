@@ -6,7 +6,7 @@ Built as a portfolio flagship project to demonstrate taking a product from requi
 
 ## Status
 
-**Phase 5 — Task Management (implemented; migration 0003 must be applied to the configured Supabase database).** Projects now have a responsive Kanban board with task CRUD, project-member assignment, priorities, due dates, labels, search, and filters. Task and label permissions are enforced by both the API and RLS.
+**Phase 7 — Sprint Management (implemented; migration 0005 must be applied to the configured Supabase database).** Projects include an unscheduled-work backlog, sprint planning, owner-managed sprint lifecycles, task assignment to sprints, and completion progress. Phase 6 provides task and issue comments, issue tracking, and an automatically recorded activity feed. Permissions are enforced by the API and Supabase RLS.
 
 See `docs/` for the full design.
 
@@ -33,7 +33,7 @@ Apply the migrations to your Supabase project. For a new database, link the Supa
 supabase db push
 ```
 
-If `0001_init.sql` and `0002_projects_and_members.sql` were already applied manually, apply `0003_task_management.sql` once in the Supabase SQL Editor, or reconcile the migration history before using `supabase db push`.
+If `0001_init.sql` through `0003_task_management.sql` were already applied manually, apply `0004_collaboration.sql` once in the Supabase SQL Editor, or reconcile the migration history before using `supabase db push`.
 
 ## Scripts
 
@@ -51,7 +51,7 @@ If `0001_init.sql` and `0002_projects_and_members.sql` were already applied manu
 
 - [`docs/architecture.md`](./docs/architecture.md) — request flow, folder structure, authorization strategy, API conventions
 - [`docs/database.md`](./docs/database.md) — ERD, table design, and RLS policies
-- [`docs/api.md`](./docs/api.md) — project, member, task, and label endpoint reference
+- [`docs/api.md`](./docs/api.md) — project, member, task, issue, comment, and activity endpoint reference
 
 ## Project roadmap
 
@@ -60,9 +60,9 @@ If `0001_init.sql` and `0002_projects_and_members.sql` were already applied manu
 2. Project Foundation — **in progress**
 3. Authentication & Authorization
 4. Projects & Members — **done**
-5. Task Management — **implemented; database migration pending**
-6. Collaboration (comments, issues, activity)
-7. Sprint Management
+5. Task Management — **implemented**
+6. Collaboration (comments, issues, activity) — **implemented**
+7. Sprint Management — **implemented; migration 0005 pending**
 8. Analytics
 9. Advanced Integrations (GitHub, real-time, notifications, attachments)
 10. Production (testing, CI/CD, deployment, docs)

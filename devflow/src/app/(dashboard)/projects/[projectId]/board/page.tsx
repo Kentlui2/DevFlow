@@ -2,10 +2,9 @@ import { notFound } from "next/navigation";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { getProjectRole } from "@/lib/auth/project-access";
 import { permissions } from "@/lib/auth/permissions";
-import {
-  listProjectLabels,
-  listProjectTasks,
-} from "@/lib/services/taskService";
+import { listProjectLabels } from "@/lib/services/taskService";
+import { listProjectTasks } from "@/lib/services/taskService";
+import { getProjectSprintWorkspace } from "@/lib/services/sprintService";
 import { createClient } from "@/lib/supabase/server";
 import type { ProjectTaskLabel, TaskPerson } from "@/lib/types/task-board";
 
@@ -36,9 +35,13 @@ export default async function ProjectBoardPage({
   const role = await getProjectRole(supabase, projectId, user.id);
   if (!role) notFound();
 
-  const [tasksResult, labelsResult, membersResult] = await Promise.allSettled([
+  const [tasksResult, labelsResult] = await Promise.allSettled([
     listProjectTasks(supabase, projectId),
     listProjectLabels(supabase, projectId),
+  ]);
+  const sprintWorkspaceResult = getProjectSprintWorkspace(supabase, projectId);
+  const [sprintWorkspaceSettled, membersResult] = await Promise.allSettled([
+    sprintWorkspaceResult,
     supabase
       .from("project_members")
       .select("user_id, profile:users(id, email, full_name)")
@@ -46,7 +49,20 @@ export default async function ProjectBoardPage({
       .order("joined_at", { ascending: true }),
   ]);
 
-  const tasks = tasksResult.status === "fulfilled" ? tasksResult.value : [];
+  const sprintWorkspace =
+    sprintWorkspaceSettled.status === "fulfilled"
+      ? sprintWorkspaceSettled.value
+      : { tasks: [], sprints: [] };
+  const taskSprintIds = new Map(
+    sprintWorkspace.tasks.map((task) => [task.id, task.sprintId])
+  );
+  const tasks =
+    tasksResult.status === "fulfilled"
+      ? tasksResult.value.map((task) => ({
+          ...task,
+          sprintId: taskSprintIds.get(task.id) ?? null,
+        }))
+      : [];
   const labels: ProjectTaskLabel[] =
     labelsResult.status === "fulfilled" ? labelsResult.value : [];
   const memberRows =
@@ -61,6 +77,7 @@ export default async function ProjectBoardPage({
   });
   const loadError =
     tasksResult.status === "rejected" ||
+    sprintWorkspaceSettled.status === "rejected" ||
     labelsResult.status === "rejected" ||
     membersResult.status === "rejected" ||
     (membersResult.status === "fulfilled" &&
@@ -70,12 +87,18 @@ export default async function ProjectBoardPage({
     <div className="space-y-6">
       <TaskBoard
         canEdit={permissions.editTask(role)}
+        currentUserId={user.id}
         initialLabels={labels}
         initialTasks={tasks}
         loadError={loadError}
         members={members}
         projectId={project.id}
         projectName={project.name}
+        sprints={sprintWorkspace.sprints.map(({ id, name, status }) => ({
+          id,
+          name,
+          status,
+        }))}
       />
     </div>
   );

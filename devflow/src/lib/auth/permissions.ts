@@ -17,6 +17,8 @@ export const permissions = {
   deleteTask: (role: Role) => role !== "viewer",
   comment: (role: Role) => role !== "viewer",
   createIssue: (role: Role) => role !== "viewer",
+  editIssue: (role: Role) => role !== "viewer",
+  deleteIssue: (role: Role) => role !== "viewer",
   manageSprint: (role: Role) => role === "owner",
   viewAnalytics: (_role: Role) => true,
   viewActivity: (_role: Role) => true,

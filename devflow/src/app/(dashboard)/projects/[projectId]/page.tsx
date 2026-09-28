@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  Activity,
+  Bug,
   ArrowLeft,
   CheckCircle2,
   CircleDashed,
@@ -26,11 +28,19 @@ const projectSections: {
     href: "board",
     action: "Open",
   },
-  { label: "Backlog", detail: "Prioritize upcoming work", icon: CircleDashed },
+  {
+    label: "Backlog",
+    detail: "Prioritize upcoming work",
+    icon: CircleDashed,
+    href: "backlog",
+    action: "Plan",
+  },
   {
     label: "Sprints",
     detail: "Plan and track development cycles",
     icon: CheckCircle2,
+    href: "sprints",
+    action: "Manage",
   },
   {
     label: "Members",
@@ -38,6 +48,20 @@ const projectSections: {
     icon: UsersRound,
     href: "members",
     action: "Manage",
+  },
+  {
+    label: "Issues",
+    detail: "Track bugs and unexpected behavior",
+    icon: Bug,
+    href: "issues",
+    action: "View",
+  },
+  {
+    label: "Activity",
+    detail: "See recent changes across this project",
+    icon: Activity,
+    href: "activity",
+    action: "View",
   },
 ];
 

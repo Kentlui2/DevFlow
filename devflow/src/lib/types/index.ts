@@ -36,6 +36,16 @@ export interface Task {
   updatedAt: string;
 }
 
-// Issue, Sprint, Comment, Activity, Label types follow the same shape
-// as the DB design in docs/database.md — add them here as each phase
-// that needs them is implemented, rather than speculatively now.
+export interface Sprint {
+  id: string;
+  projectId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: SprintStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Issue, Comment, Activity, and Label types follow the DB design in
+// docs/database.md and are defined alongside their feature modules.
