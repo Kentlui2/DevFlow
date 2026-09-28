@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Toast } from "@/components/ui/toast";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
 import { CommentThread } from "@/components/shared/comment-thread";
 import { AttachmentsPanel } from "@/components/shared/attachments-panel";
@@ -222,11 +223,7 @@ export function IssueList({
           {error}
         </p>
       ) : null}
-      {notice ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <Toast key={notice} message={notice} /> : null}
 
       {filteredIssues.length ? (
         <div className="overflow-x-auto rounded-lg border">
@@ -585,15 +582,20 @@ function IssueEditorDialog({
         </form>
         {issue ? (
           <>
-          <AttachmentsPanel canEdit={canEdit} projectId={projectId} targetId={issue.id} targetType="issue" />
-          <CommentThread
-            canComment={canEdit}
-            commentableId={issue.id}
-            commentableType="issue"
-            currentUserId={currentUserId}
-            initialComments={[]}
-            projectId={projectId}
-          />
+            <AttachmentsPanel
+              canEdit={canEdit}
+              projectId={projectId}
+              targetId={issue.id}
+              targetType="issue"
+            />
+            <CommentThread
+              canComment={canEdit}
+              commentableId={issue.id}
+              commentableType="issue"
+              currentUserId={currentUserId}
+              initialComments={[]}
+              projectId={projectId}
+            />
           </>
         ) : null}
         <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t pt-4">

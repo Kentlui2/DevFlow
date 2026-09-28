@@ -18,6 +18,7 @@ import type { SprintWithTasks } from "@/lib/services/sprintService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Toast } from "@/components/ui/toast";
 import { ConfirmDialogButton } from "@/components/shared/confirm-dialog-button";
 
 export function SprintWorkspace({
@@ -198,11 +199,7 @@ export function SprintWorkspace({
           {error}
         </p>
       ) : null}
-      {notice ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <Toast key={notice} message={notice} /> : null}
 
       {orderedSprints.length ? (
         <>

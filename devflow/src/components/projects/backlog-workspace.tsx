@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Toast } from "@/components/ui/toast";
 import {
   TASK_PRIORITIES,
   TASK_STATUSES,
@@ -174,11 +175,7 @@ export function BacklogWorkspace({
           {error}
         </p>
       ) : null}
-      {notice ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <Toast key={notice} message={notice} /> : null}
 
       <section
         aria-label="Filter backlog"

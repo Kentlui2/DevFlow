@@ -51,7 +51,7 @@ export const ISSUE_STATUSES: { value: IssueStatus; label: string }[] = [
 ];
 
 export const ISSUE_PRIORITIES: { value: IssuePriority; label: string }[] = [
-  { value: "urgent", label: "Urgent" },
+  { value: "urgent", label: "Critical" },
   { value: "high", label: "High" },
   { value: "medium", label: "Medium" },
   { value: "low", label: "Low" },

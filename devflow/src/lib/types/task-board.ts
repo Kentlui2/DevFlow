@@ -42,7 +42,7 @@ export const TASK_STATUSES: TaskStatusOption[] = [
 ];
 
 export const TASK_PRIORITIES: { value: TaskPriority; label: string }[] = [
-  { value: "urgent", label: "Urgent" },
+  { value: "urgent", label: "Critical" },
   { value: "high", label: "High" },
   { value: "medium", label: "Medium" },
   { value: "low", label: "Low" },

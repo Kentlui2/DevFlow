@@ -5,6 +5,7 @@ import { Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Toast } from "@/components/ui/toast";
 import type { Sprint } from "@/lib/types";
 import { TaskEditorDialog } from "@/components/tasks/task-editor-dialog";
 import {
@@ -326,11 +327,7 @@ export function TaskBoard({
           {error}
         </p>
       ) : null}
-      {notice ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <Toast key={notice} message={notice} /> : null}
 
       <section aria-label="Kanban board" className="overflow-x-auto pb-3">
         <div className="grid w-max min-w-full auto-cols-[minmax(16rem,1fr)] grid-flow-col gap-3 xl:w-full xl:auto-cols-fr">
