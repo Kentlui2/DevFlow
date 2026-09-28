@@ -6,7 +6,7 @@ Built as a portfolio flagship project to demonstrate taking a product from requi
 
 ## Status
 
-**Phase 9 — Advanced Integrations (implemented).** Projects can connect GitHub repositories, view recent commits/pull requests/issues, and link code references to tasks. Live project activity and comments refresh in real time; assignment, mention, comment, sprint, and pull request events create an in-app notification; tasks, issues, and comments support private file attachments. Permissions are enforced by project membership and Supabase RLS.
+**Phase 10 — Production readiness (in progress).** Phase 9 integrations are implemented: projects can connect GitHub repositories, view recent commits/pull requests/issues, and link code references to tasks. Live project activity and comments refresh in real time; assignment, mention, comment, sprint, and pull request events create in-app notifications; tasks, issues, and comments support private file attachments. Phase 10 adds automated checks, end-to-end smoke coverage, CI, deployment guidance, and operations documentation.
 
 See `docs/` for the full design.
 
@@ -17,7 +17,7 @@ See `docs/` for the full design.
 - **Database:** Supabase Postgres
 - **Auth:** Supabase Auth
 - **Validation:** Zod
-- **Testing:** Vitest + React Testing Library (unit), Playwright (E2E — added in Phase 10)
+- **Testing:** Vitest + React Testing Library (unit/component), Playwright (browser smoke tests)
 
 ## Setup
 
@@ -46,27 +46,31 @@ To enable the GitHub App flow, apply `supabase/migrations/0007_github_app_instal
 | `npm run dev`          | Start the dev server         |
 | `npm run build`        | Production build             |
 | `npm run lint`         | ESLint                       |
+| `npm run typecheck`    | TypeScript check             |
 | `npm run format`       | Prettier (writes)            |
 | `npm run format:check` | Prettier (check only)        |
 | `npm test`             | Run unit tests once          |
 | `npm run test:watch`   | Run unit tests in watch mode |
+| `npm run test:e2e`     | Run Playwright browser tests |
 
 ## Documentation
 
 - [`docs/architecture.md`](./docs/architecture.md) — request flow, folder structure, authorization strategy, API conventions
 - [`docs/database.md`](./docs/database.md) — ERD, table design, and RLS policies
 - [`docs/api.md`](./docs/api.md) — project, member, task, issue, comment, activity, attachment, notification, and GitHub endpoint reference
+- [`docs/development.md`](./docs/development.md) — local setup and verification commands
+- [`docs/deployment.md`](./docs/deployment.md) — Supabase and Vercel production deployment, configuration, and smoke checks
 
 ## Project roadmap
 
 0. Product Planning — **done**
 1. System Design — **done**
-2. Project Foundation — **in progress**
-3. Authentication & Authorization
+2. Project Foundation — **done**
+3. Authentication & Authorization — **implemented**
 4. Projects & Members — **done**
 5. Task Management — **implemented**
 6. Collaboration (comments, issues, activity) — **implemented**
 7. Sprint Management — **implemented**
 8. Analytics — **implemented**
 9. Advanced Integrations (GitHub, real-time, notifications, attachments) — **implemented**
-10. Production (testing, CI/CD, deployment, docs)
+10. Production (testing, CI/CD, deployment, docs) — **in progress**

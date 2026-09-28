@@ -8,7 +8,7 @@
 - **Database:** Supabase Postgres
 - **Auth:** Supabase Auth (email/password for MVP; social providers are a cheap post-MVP add)
 - **Validation:** Zod schemas, shared between client forms and API route input validation
-- **Testing:** Vitest + React Testing Library (unit/component), Playwright (E2E on critical flows: auth, task CRUD, kanban drag)
+- **Testing:** Vitest + React Testing Library (permissions and task board create/move behavior), Playwright (browser checks for signed-out redirects, sign-in errors, and registration validation)
 - **Deployment:** Vercel (app) + Supabase (DB/auth), GitHub Actions for CI
 
 ## Request flow
@@ -29,6 +29,8 @@ Supabase Postgres (+ RLS as second authorization layer)
 ```
 
 Every route handler follows the same shape: **authenticate → validate input → authorize → call service → return typed response.** This is the pattern that gets tested and documented once, then repeated — it's also the cleanest thing to point to in a portfolio walkthrough ("here's how every mutation in this app is protected").
+
+The production verification pipeline is documented in [`development.md`](./development.md) and runs through GitHub Actions. Browser smoke tests use placeholder Supabase settings and do not require a live account; the release checklist in [`deployment.md`](./deployment.md) covers the real Supabase-backed workflows before production promotion.
 
 ## Folder structure
 

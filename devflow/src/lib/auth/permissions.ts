@@ -8,7 +8,8 @@ export type Role = "owner" | "developer" | "viewer";
  * doesn't become a real vulnerability.
  */
 export const permissions = {
-  viewProject: (_role: Role) => true,
+  viewProject: (role: Role) =>
+    role === "owner" || role === "developer" || role === "viewer",
   editProject: (role: Role) => role === "owner",
   deleteProject: (role: Role) => role === "owner",
   manageMembers: (role: Role) => role === "owner",
@@ -20,6 +21,8 @@ export const permissions = {
   editIssue: (role: Role) => role !== "viewer",
   deleteIssue: (role: Role) => role !== "viewer",
   manageSprint: (role: Role) => role === "owner",
-  viewAnalytics: (_role: Role) => true,
-  viewActivity: (_role: Role) => true,
+  viewAnalytics: (role: Role) =>
+    role === "owner" || role === "developer" || role === "viewer",
+  viewActivity: (role: Role) =>
+    role === "owner" || role === "developer" || role === "viewer",
 } as const satisfies Record<string, (role: Role) => boolean>;
